@@ -1,0 +1,28 @@
+Process ID / Metric,Arrival / Value,Burst,Start,Finish,Waiting,Turnaround,Response
+P15,0,7,0,8,1,8,0
+P12,3,1,3,4,0,1,0
+P7,2,5,8,13,6,11,6
+P9,4,5,13,18,9,14,9
+P2,1,6,18,24,17,23,17
+P5,1,6,24,30,23,29,23
+P18,3,7,30,37,27,34,27
+P20,3,7,37,44,34,41,34
+P3,4,8,44,52,40,48,40
+P4,4,11,52,63,48,59,48
+P1,3,12,63,75,60,72,60
+P19,1,13,75,88,74,87,74
+P14,1,14,88,102,87,101,87
+P6,2,14,102,116,100,114,100
+P11,4,15,116,131,112,127,112
+P13,1,17,131,148,130,147,130
+P17,0,18,148,166,148,166,148
+P16,1,18,166,184,165,183,165
+P10,2,18,184,202,182,200,182
+P8,2,19,202,221,200,219,200
+
+Algorithm,SRTF - Shortest Remaining Time First,,,,,,
+Average Waiting Time,73.15 seconds,,,,,,
+Average Turnaround Time,84.20 seconds,,,,,,
+Average Response Time,73.10 seconds,,,,,,
+CPU Utilization,100.00%,,,,,,
+Throughput,0.090 processes/second,,,,,,

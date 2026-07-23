@@ -1,0 +1,13 @@
+Process ID / Metric,Arrival / Value,Burst,Start,Finish,Waiting,Turnaround,Response
+P1,0,8,0,8,0,8,0
+P2,1,4,8,12,7,11,7
+P3,2,9,12,21,10,19,10
+P4,3,5,21,26,18,23,18
+P5,4,2,26,28,22,24,22
+
+Algorithm,FCFS - First Come First Serve,,,,,,
+Average Waiting Time,11.40 seconds,,,,,,
+Average Turnaround Time,17.00 seconds,,,,,,
+Average Response Time,11.40 seconds,,,,,,
+CPU Utilization,100.00%,,,,,,
+Throughput,0.179 processes/second,,,,,,

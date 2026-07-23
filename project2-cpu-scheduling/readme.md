@@ -92,3 +92,30 @@ dotnet run --project CpuScheduler/CpuScheduler.csproj
 ### License
 
 This project is licensed under the terms of the [MIT license](LICENSE.txt).
+
+## Project 2 Additions
+
+This version adds:
+
+- Shortest Remaining Time First (SRTF)
+- Highest Response Ratio Next (HRRN)
+- Average waiting time
+- Average turnaround time
+- Average response time
+- CPU utilization
+- Throughput
+- CSV result export
+- Small, medium, large, and idle-gap test workloads
+
+## Build and Run
+
+Requirements:
+
+- Windows
+- .NET 8 SDK
+
+From the project folder:
+
+```powershell
+dotnet build
+dotnet run --project .\CpuScheduler\CpuScheduler.csproj

@@ -53,9 +53,12 @@
             this.algorithmButtonPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.resultsPanel = new System.Windows.Forms.Panel();
             this.listView1 = new System.Windows.Forms.ListView();
+            this.btnExportResults = new System.Windows.Forms.Button();
             this.aboutPanel = new System.Windows.Forms.Panel();
             this.aboutTextBox = new System.Windows.Forms.RichTextBox();
             this.btnRoundRobin = new System.Windows.Forms.Button();
+            this.btnSRTF = new System.Windows.Forms.Button();
+            this.btnHRRN = new System.Windows.Forms.Button();
             this.restartApp = new System.Windows.Forms.Label();
             this.btnPriority = new System.Windows.Forms.Button();
             this.btnSJF = new System.Windows.Forms.Button();
@@ -263,6 +266,7 @@
             // resultsPanel
             // 
             this.resultsPanel.BackColor = System.Drawing.SystemColors.Control;
+            this.resultsPanel.Controls.Add(this.btnExportResults);
             this.resultsPanel.Controls.Add(this.listView1);
             this.resultsPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.resultsPanel.Location = new System.Drawing.Point(0, 0);
@@ -271,6 +275,25 @@
             this.resultsPanel.Size = new System.Drawing.Size(728, 600);
             this.resultsPanel.TabIndex = 0;
             this.resultsPanel.Visible = true;
+            // 
+            // btnExportResults
+            // 
+            this.btnExportResults.Anchor = ((System.Windows.Forms.AnchorStyles)
+                ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnExportResults.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnExportResults.Font = new System.Drawing.Font(
+                "Segoe UI",
+                9F,
+                System.Drawing.FontStyle.Bold,
+                System.Drawing.GraphicsUnit.Point,
+                ((byte)(0)));
+            this.btnExportResults.Location = new System.Drawing.Point(570, 10);
+            this.btnExportResults.Name = "btnExportResults";
+            this.btnExportResults.Size = new System.Drawing.Size(140, 32);
+            this.btnExportResults.TabIndex = 11;
+            this.btnExportResults.Text = "Export Results";
+            this.btnExportResults.UseVisualStyleBackColor = true;
+            this.btnExportResults.Click += new System.EventHandler(this.ExportResults_Click);
             // 
             // listView1
             // 
@@ -283,9 +306,9 @@
             this.listView1.FullRowSelect = true;
             this.listView1.GridLines = true;
             this.listView1.HideSelection = false;
-            this.listView1.Location = new System.Drawing.Point(10, 10);
+            this.listView1.Location = new System.Drawing.Point(10, 50);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(700, 570);
+            this.listView1.Size = new System.Drawing.Size(700, 530);
             this.listView1.TabIndex = 10;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
@@ -421,6 +444,8 @@
             this.algorithmButtonPanel.Controls.Add(this.btnSJF);
             this.algorithmButtonPanel.Controls.Add(this.btnPriority);
             this.algorithmButtonPanel.Controls.Add(this.btnRoundRobin);
+            this.algorithmButtonPanel.Controls.Add(this.btnSRTF);
+            this.algorithmButtonPanel.Controls.Add(this.btnHRRN);
             this.algorithmButtonPanel.FlowDirection = System.Windows.Forms.FlowDirection.LeftToRight;
             this.algorithmButtonPanel.Location = new System.Drawing.Point(20, 450);
             this.algorithmButtonPanel.Name = "algorithmButtonPanel";
@@ -443,6 +468,46 @@
             this.btnRoundRobin.Text = "ROUND ROBIN";
             this.btnRoundRobin.UseVisualStyleBackColor = false;
             this.btnRoundRobin.Click += new System.EventHandler(this.RoundRobinButton_Click);
+            // 
+            // btnSRTF
+            // 
+            this.btnSRTF.BackColor = System.Drawing.Color.LemonChiffon;
+            this.btnSRTF.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnSRTF.FlatAppearance.MouseOverBackColor = System.Drawing.Color.PaleGreen;
+            this.btnSRTF.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSRTF.Font = new System.Drawing.Font(
+                "Microsoft Sans Serif",
+                10F,
+                System.Drawing.FontStyle.Bold,
+                System.Drawing.GraphicsUnit.Point,
+                ((byte)(0)));
+            this.btnSRTF.Margin = new System.Windows.Forms.Padding(10, 5, 10, 5);
+            this.btnSRTF.Name = "btnSRTF";
+            this.btnSRTF.Size = new System.Drawing.Size(140, 50);
+            this.btnSRTF.TabIndex = 13;
+            this.btnSRTF.Text = "SRTF";
+            this.btnSRTF.UseVisualStyleBackColor = false;
+            this.btnSRTF.Click += new System.EventHandler(this.SRTFButton_Click);
+            // 
+            // btnHRRN
+            // 
+            this.btnHRRN.BackColor = System.Drawing.Color.Honeydew;
+            this.btnHRRN.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnHRRN.FlatAppearance.MouseOverBackColor = System.Drawing.Color.PaleGreen;
+            this.btnHRRN.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnHRRN.Font = new System.Drawing.Font(
+                "Microsoft Sans Serif",
+                10F,
+                System.Drawing.FontStyle.Bold,
+                System.Drawing.GraphicsUnit.Point,
+                ((byte)(0)));
+            this.btnHRRN.Margin = new System.Windows.Forms.Padding(10, 5, 10, 5);
+            this.btnHRRN.Name = "btnHRRN";
+            this.btnHRRN.Size = new System.Drawing.Size(140, 50);
+            this.btnHRRN.TabIndex = 14;
+            this.btnHRRN.Text = "HRRN";
+            this.btnHRRN.UseVisualStyleBackColor = false;
+            this.btnHRRN.Click += new System.EventHandler(this.HRRNButton_Click);
             // 
             // restartApp
             // 
@@ -610,6 +675,8 @@
         private System.Windows.Forms.Label labelProcess;
         private System.Windows.Forms.Panel sidePanel;
         private System.Windows.Forms.Button btnRoundRobin;
+        private System.Windows.Forms.Button btnSRTF;
+        private System.Windows.Forms.Button btnHRRN;
         private System.Windows.Forms.ListView listView1;
         private System.Windows.Forms.Panel aboutPanel;
         private System.Windows.Forms.RichTextBox aboutTextBox;
@@ -622,5 +689,6 @@
         private System.Windows.Forms.ComboBox cmbLoadExample;
         private System.Windows.Forms.FlowLayoutPanel algorithmButtonPanel;
         private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.Button btnExportResults;
     }
 }

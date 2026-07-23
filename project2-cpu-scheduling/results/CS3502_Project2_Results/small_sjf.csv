@@ -1,0 +1,13 @@
+Process ID / Metric,Arrival / Value,Burst,Start,Finish,Waiting,Turnaround,Response
+P1,0,8,0,8,0,8,0
+P5,4,2,8,10,4,6,4
+P2,1,4,10,14,9,13,9
+P4,3,5,14,19,11,16,11
+P3,2,9,19,28,17,26,17
+
+Algorithm,SJF - Shortest Job First,,,,,,
+Average Waiting Time,8.20 seconds,,,,,,
+Average Turnaround Time,13.80 seconds,,,,,,
+Average Response Time,8.20 seconds,,,,,,
+CPU Utilization,100.00%,,,,,,
+Throughput,0.179 processes/second,,,,,,

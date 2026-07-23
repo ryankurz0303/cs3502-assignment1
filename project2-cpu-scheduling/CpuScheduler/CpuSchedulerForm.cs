@@ -112,11 +112,13 @@ This introduction page explaining the simulator and navigation.
 ⚙️ SCHEDULER
 The main interface where you can:
 • Enter the number of processes to simulate
-• Choose from 4 scheduling algorithms:
+• Choose from 6 scheduling algorithms:
   - FCFS (First Come, First Serve)
   - SJF (Shortest Job First)
   - Priority Scheduling
   - Round Robin
+  - SRTF (Shortest Remaining Time First)
+  - HRRN (Highest Response Ratio Next)
 • Run simulations and see immediate feedback
 
 📊 RESULTS
@@ -154,7 +156,7 @@ Ready to start? Click 'Scheduler' to begin your CPU scheduling exploration!";
         {
             aboutTextBox.Text = @"CPU Scheduling Algorithms
 
-This simulator demonstrates four fundamental CPU scheduling algorithms used in operating systems:
+This simulator demonstrates six CPU scheduling algorithms used in operating systems:
 
 FIRST COME, FIRST SERVE (FCFS)
 • Non-preemptive algorithm
@@ -179,6 +181,18 @@ ROUND ROBIN (RR)
 • Each process gets equal CPU time slices
 • Good for time-sharing systems
 • Performance depends on quantum size
+
+SHORTEST REMAINING TIME FIRST (SRTF)
+• Preemptive version of Shortest Job First
+• Always selects the process with the least remaining burst time
+• Can provide low average waiting time
+• Longer processes may experience starvation
+
+HIGHEST RESPONSE RATIO NEXT (HRRN)
+• Non-preemptive algorithm
+• Uses waiting time and burst time to calculate a response ratio
+• Helps balance short jobs with processes that have waited longer
+• Reduces starvation compared with basic SJF
 
 Learning Objectives:
 • Understand how different algorithms handle process scheduling
@@ -463,6 +477,133 @@ Instructions:
         }
 
         /// <summary>
+        /// Shortest Remaining Time First scheduling algorithm.
+        /// This is the preemptive version of Shortest Job First.
+        /// </summary>
+        private List<SchedulingResult> RunSRTFAlgorithm(List<ProcessData> processes)
+        {
+            var results = new Dictionary<string, SchedulingResult>();
+            var remainingTimes = new Dictionary<string, int>();
+
+            foreach (var process in processes)
+            {
+                remainingTimes[process.ProcessID] = process.BurstTime;
+
+                results[process.ProcessID] = new SchedulingResult
+                {
+                    ProcessID = process.ProcessID,
+                    ArrivalTime = process.ArrivalTime,
+                    BurstTime = process.BurstTime,
+                    StartTime = -1,
+                    FinishTime = 0,
+                    WaitingTime = 0,
+                    TurnaroundTime = 0
+                };
+            }
+
+            int currentTime = 0;
+            int completedProcesses = 0;
+
+            while (completedProcesses < processes.Count)
+            {
+                var availableProcesses = processes
+                    .Where(p =>
+                        p.ArrivalTime <= currentTime &&
+                        remainingTimes[p.ProcessID] > 0)
+                    .OrderBy(p => remainingTimes[p.ProcessID])
+                    .ThenBy(p => p.ArrivalTime)
+                    .ThenBy(p => p.ProcessID)
+                    .ToList();
+
+                if (availableProcesses.Count == 0)
+                {
+                    currentTime++;
+                    continue;
+                }
+
+                var currentProcess = availableProcesses.First();
+                var result = results[currentProcess.ProcessID];
+
+                if (result.StartTime == -1)
+                {
+                    result.StartTime = currentTime;
+                }
+
+                remainingTimes[currentProcess.ProcessID]--;
+                currentTime++;
+
+                if (remainingTimes[currentProcess.ProcessID] == 0)
+                {
+                    result.FinishTime = currentTime;
+                    result.TurnaroundTime =
+                        result.FinishTime - result.ArrivalTime;
+                    result.WaitingTime =
+                        result.TurnaroundTime - result.BurstTime;
+
+                    completedProcesses++;
+                }
+            }
+
+            return results.Values
+                .OrderBy(r => r.StartTime)
+                .ThenBy(r => r.ProcessID)
+                .ToList();
+        }
+
+        /// <summary>
+        /// Highest Response Ratio Next scheduling algorithm.
+        /// Selects the available process with the highest response ratio.
+        /// </summary>
+        private List<SchedulingResult> RunHRRNAlgorithm(List<ProcessData> processes)
+        {
+            var results = new List<SchedulingResult>();
+            var remainingProcesses = processes.ToList();
+            int currentTime = 0;
+
+            while (remainingProcesses.Count > 0)
+            {
+                var availableProcesses = remainingProcesses
+                    .Where(p => p.ArrivalTime <= currentTime)
+                    .ToList();
+
+                if (availableProcesses.Count == 0)
+                {
+                    currentTime = remainingProcesses.Min(p => p.ArrivalTime);
+                    continue;
+                }
+
+                var nextProcess = availableProcesses
+                    .OrderByDescending(p =>
+                        ((double)(currentTime - p.ArrivalTime) + p.BurstTime)
+                        / p.BurstTime)
+                    .ThenBy(p => p.ArrivalTime)
+                    .ThenBy(p => p.ProcessID)
+                    .First();
+
+                int startTime = currentTime;
+                int finishTime = startTime + nextProcess.BurstTime;
+                int waitingTime = startTime - nextProcess.ArrivalTime;
+                int turnaroundTime = finishTime - nextProcess.ArrivalTime;
+
+                results.Add(new SchedulingResult
+                {
+                    ProcessID = nextProcess.ProcessID,
+                    ArrivalTime = nextProcess.ArrivalTime,
+                    BurstTime = nextProcess.BurstTime,
+                    StartTime = startTime,
+                    FinishTime = finishTime,
+                    WaitingTime = waitingTime,
+                    TurnaroundTime = turnaroundTime
+                });
+
+                currentTime = finishTime;
+                remainingProcesses.Remove(nextProcess);
+            }
+
+            return results.OrderBy(r => r.StartTime).ToList();
+        }
+
+        /// <summary>
         /// STUDENTS: Data structure for algorithm results
         /// Use this to store and display scheduling algorithm outcomes
         /// </summary>
@@ -475,29 +616,33 @@ Instructions:
             public int FinishTime { get; set; }
             public int WaitingTime { get; set; }
             public int TurnaroundTime { get; set; }
+            public int ResponseTime { get; set; }
         }
 
         /// <summary>
         /// STUDENTS: Displays scheduling results in a formatted table
         /// Use this method to show your algorithm results consistently
         /// </summary>
-        private void DisplaySchedulingResults(List<SchedulingResult> results, string algorithmName)
+        private void DisplaySchedulingResults(
+            List<SchedulingResult> results,
+            string algorithmName)
         {
             listView1.Clear();
             listView1.View = View.Details;
 
-            // Set up columns for detailed results
-            listView1.Columns.Add("Process ID", 100, HorizontalAlignment.Center);
-            listView1.Columns.Add("Arrival", 80, HorizontalAlignment.Center);
-            listView1.Columns.Add("Burst", 80, HorizontalAlignment.Center);
-            listView1.Columns.Add("Start", 80, HorizontalAlignment.Center);
-            listView1.Columns.Add("Finish", 80, HorizontalAlignment.Center);
-            listView1.Columns.Add("Waiting", 80, HorizontalAlignment.Center);
-            listView1.Columns.Add("Turnaround", 90, HorizontalAlignment.Center);
+            listView1.Columns.Add("Process ID / Metric", 150, HorizontalAlignment.Left);
+            listView1.Columns.Add("Arrival / Value", 220, HorizontalAlignment.Left);
+            listView1.Columns.Add("Burst", 60, HorizontalAlignment.Center);
+            listView1.Columns.Add("Start", 60, HorizontalAlignment.Center);
+            listView1.Columns.Add("Finish", 60, HorizontalAlignment.Center);
+            listView1.Columns.Add("Waiting", 70, HorizontalAlignment.Center);
+            listView1.Columns.Add("Turnaround", 85, HorizontalAlignment.Center);
+            listView1.Columns.Add("Response", 75, HorizontalAlignment.Center);
 
-            // Add process results
             foreach (var result in results)
             {
+                result.ResponseTime = result.StartTime - result.ArrivalTime;
+
                 var item = new ListViewItem(result.ProcessID);
                 item.SubItems.Add(result.ArrivalTime.ToString());
                 item.SubItems.Add(result.BurstTime.ToString());
@@ -505,37 +650,50 @@ Instructions:
                 item.SubItems.Add(result.FinishTime.ToString());
                 item.SubItems.Add(result.WaitingTime.ToString());
                 item.SubItems.Add(result.TurnaroundTime.ToString());
+                item.SubItems.Add(result.ResponseTime.ToString());
+
                 listView1.Items.Add(item);
             }
-            
-            // Add summary statistics
-            var avgWaiting = results.Average(r => r.WaitingTime);
-            var avgTurnaround = results.Average(r => r.TurnaroundTime);
-            
-            var summaryItem = new ListViewItem("SUMMARY");
-            summaryItem.SubItems.Add(algorithmName);
-            summaryItem.SubItems.Add($"{results.Count} processes");
-            summaryItem.SubItems.Add($"Avg Wait: {avgWaiting:F1}");
-            summaryItem.SubItems.Add($"Avg Turn: {avgTurnaround:F1}");
-            summaryItem.SubItems.Add("");
-            summaryItem.SubItems.Add("");
-            listView1.Items.Add(summaryItem);
 
-            // TODO: STUDENTS - Add performance metrics calculation and display here
-            // Required metrics for your project report:
-            // 1. Average Waiting Time (AWT) - sum of all waiting times / number of processes
-            // 2. Average Turnaround Time (ATT) - sum of all turnaround times / number of processes  
-            // 3. CPU Utilization (%) - (total burst time / total time) * 100
-            // 4. Throughput (processes/second) - number of processes / total time
-            // 5. Response Time (RT) [Optional] - time from arrival to first execution
-            // Display these metrics in the results view for comparison between algorithms
-            
-            // TODO: STUDENTS - Add CSV export functionality for results data
-            // Create a "Export Results" button in the results panel to save:
-            // - Individual process results (what's shown in listView1)
-            // - Performance metrics summary for each algorithm tested
-            // Reference the SaveData_Click() method above to learn CSV file handling
-            // This will help you create tables/charts for your project report
+            double averageWaitingTime = results.Average(r => r.WaitingTime);
+            double averageTurnaroundTime = results.Average(r => r.TurnaroundTime);
+            double averageResponseTime = results.Average(r => r.ResponseTime);
+
+            int firstArrivalTime = results.Min(r => r.ArrivalTime);
+            int finalFinishTime = results.Max(r => r.FinishTime);
+            int totalElapsedTime = finalFinishTime - firstArrivalTime;
+            int totalBurstTime = results.Sum(r => r.BurstTime);
+
+            double cpuUtilization = totalElapsedTime > 0
+                ? totalBurstTime * 100.0 / totalElapsedTime
+                : 0;
+
+            double throughput = totalElapsedTime > 0
+                ? results.Count / (double)totalElapsedTime
+                : 0;
+
+            var blankItem = new ListViewItem("");
+            listView1.Items.Add(blankItem);
+
+            AddMetricRow("Algorithm", algorithmName);
+            AddMetricRow("Average Waiting Time", $"{averageWaitingTime:F2} seconds");
+            AddMetricRow("Average Turnaround Time", $"{averageTurnaroundTime:F2} seconds");
+            AddMetricRow("Average Response Time", $"{averageResponseTime:F2} seconds");
+            AddMetricRow("CPU Utilization", $"{cpuUtilization:F2}%");
+            AddMetricRow("Throughput", $"{throughput:F3} processes/second");
+        }
+
+        private void AddMetricRow(string metricName, string metricValue)
+        {
+            var item = new ListViewItem(metricName);
+            item.SubItems.Add(metricValue);
+
+            for (int i = 2; i < listView1.Columns.Count; i++)
+            {
+                item.SubItems.Add("");
+            }
+
+            listView1.Items.Add(item);
         }
 
         /// <summary>
@@ -1289,6 +1447,150 @@ Instructions:
             {
                 MessageBox.Show("Please set process count and ensure the data grid has process data.", 
                     "No Process Data", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtProcess.Focus();
+            }
+        }
+
+        /// <summary>
+        /// Exports the current results table and metrics to a CSV file.
+        /// </summary>
+        private void ExportResults_Click(object sender, EventArgs e)
+        {
+            if (listView1.Items.Count == 0)
+            {
+                MessageBox.Show(
+                    "There are no results to export.",
+                    "No Results",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                return;
+            }
+
+            using (var saveDialog = new SaveFileDialog())
+            {
+                saveDialog.Filter = "CSV files (*.csv)|*.csv|All files (*.*)|*.*";
+                saveDialog.DefaultExt = "csv";
+                saveDialog.FileName = "SchedulingResults.csv";
+                saveDialog.Title = "Export Scheduling Results";
+
+                if (saveDialog.ShowDialog() != DialogResult.OK)
+                {
+                    return;
+                }
+
+                try
+                {
+                    using (var writer = new System.IO.StreamWriter(saveDialog.FileName))
+                    {
+                        // Write the column headers.
+                        var headers = listView1.Columns
+                            .Cast<ColumnHeader>()
+                            .Select(column => EscapeCsvValue(column.Text));
+
+                        writer.WriteLine(string.Join(",", headers));
+
+                        // Write each row currently shown in the results table.
+                        foreach (ListViewItem item in listView1.Items)
+                        {
+                            var values = item.SubItems
+                                .Cast<ListViewItem.ListViewSubItem>()
+                                .Select(subItem => EscapeCsvValue(subItem.Text));
+
+                            writer.WriteLine(string.Join(",", values));
+                        }
+                    }
+
+                    MessageBox.Show(
+                        $"Results exported successfully to:\n{saveDialog.FileName}",
+                        "Export Complete",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        $"Error exporting results: {ex.Message}",
+                        "Export Error",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private string EscapeCsvValue(string value)
+        {
+            if (value == null)
+            {
+                return "";
+            }
+
+            if (value.Contains(",") || value.Contains("\"") ||
+                value.Contains("\n") || value.Contains("\r"))
+            {
+                return "\"" + value.Replace("\"", "\"\"") + "\"";
+            }
+
+            return value;
+        }
+
+        /// <summary>
+        /// Runs the Shortest Remaining Time First algorithm.
+        /// </summary>
+        private void SRTFButton_Click(object sender, EventArgs e)
+        {
+            var processData = GetProcessDataFromGrid();
+
+            if (processData.Count > 0)
+            {
+                var results = RunSRTFAlgorithm(processData);
+
+                DisplaySchedulingResults(
+                    results,
+                    "SRTF - Shortest Remaining Time First");
+
+                ShowPanel(resultsPanel);
+                sidePanel.Height = btnDashBoard.Height;
+                sidePanel.Top = btnDashBoard.Top;
+            }
+            else
+            {
+                MessageBox.Show(
+                    "Please set process count and ensure the data grid has process data.",
+                    "No Process Data",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+                txtProcess.Focus();
+            }
+        }
+
+        /// <summary>
+        /// Runs the Highest Response Ratio Next algorithm.
+        /// </summary>
+        private void HRRNButton_Click(object sender, EventArgs e)
+        {
+            var processData = GetProcessDataFromGrid();
+
+            if (processData.Count > 0)
+            {
+                var results = RunHRRNAlgorithm(processData);
+
+                DisplaySchedulingResults(
+                    results,
+                    "HRRN - Highest Response Ratio Next");
+
+                ShowPanel(resultsPanel);
+                sidePanel.Height = btnDashBoard.Height;
+                sidePanel.Top = btnDashBoard.Top;
+            }
+            else
+            {
+                MessageBox.Show(
+                    "Please set process count and ensure the data grid has process data.",
+                    "No Process Data",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
                 txtProcess.Focus();
             }
         }

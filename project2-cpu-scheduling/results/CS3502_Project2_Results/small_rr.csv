@@ -1,0 +1,13 @@
+Process ID / Metric,Arrival / Value,Burst,Start,Finish,Waiting,Turnaround,Response
+P1,0,8,0,22,14,22,0
+P2,1,4,4,8,3,7,3
+P3,2,9,8,28,17,26,6
+P4,3,5,12,27,19,24,9
+P5,4,2,16,18,12,14,12
+
+Algorithm,Round Robin (Quantum = 4),,,,,,
+Average Waiting Time,13.00 seconds,,,,,,
+Average Turnaround Time,18.60 seconds,,,,,,
+Average Response Time,6.00 seconds,,,,,,
+CPU Utilization,100.00%,,,,,,
+Throughput,0.179 processes/second,,,,,,
